@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Mining Safety Multicamera
+    </title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+
+        body {
+            background:
+                #020617;
+        }
+
+        .danger-pulse {
+            animation:
+                dangerPulse 1s infinite;
+        }
+
+        @keyframes dangerPulse {
+
+            0%, 100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.45;
+            }
+
+        }
+
+        .camera-card {
+            transition:
+                border-color 0.25s,
+                box-shadow 0.25s;
+        }
+
+        .camera-card.danger {
+            box-shadow:
+                0 0 25px
+                rgba(239, 68, 68, 0.25);
+        }
+
+        .camera-card.offline {
+            opacity: 0.75;
+        }
+
+        .video-container {
+            aspect-ratio:
+                16 / 9;
+        }
+
+    </style>
+
+</head>
+
+
+<body
+    class="
+        min-h-screen
+        bg-slate-950
+        text-white
+        font-sans
+    "
+>
+
+
+<!-- ====================================================== -->
+<!-- HEADER -->
+<!-- ====================================================== -->
+
+<header
+    class="
+        bg-slate-900
+        border-b
+        border-slate-800
+        px-6
+        py-4
+        sticky
+        top-0
+        z-50
+    "
+>
+
+    <div
+        class="
+            max-w-[1800px]
+            mx-auto
+            flex
+            flex-col
+            md:flex-row
+            md:items-center
+            md:justify-between
+            gap-4
+        "
+    >
+
+        <div>
+
+            <div
+                class="
+                    flex
+                    items-center
+                    gap-3
+                "
+            >
+
+                <div
+                    id="system-dot"
+                    class="
+                        w-3
+                        h-3
+                        rounded-full
+                        bg-emerald-500
+                        animate-pulse
+                    "
+                ></div>
+
+                <h1
+                    class="
+                        text-xl
+                        md:text-2xl
+                        font-black
+                        tracking-wider
+                    "
+                >
+                    MINING SAFETY
+                    MONITORING
+                </h1>
+
+            </div>
+
+            <p
+                class="
+                    text-xs
+                    text-slate-500
+                    mt-1
+                "
+            >
+                MULTICAMERA PERSON
+                DETECTION SYSTEM
+            </p>
+
+        </div>
+
+
+        <div
+            class="
+                flex
+                items-center
+                gap-6
+                text-xs
+            "
+        >
+
+            <div>
+
+                <span
+                    class="text-slate-500"
+                >
+                    SYSTEM
+                </span>
+
+                <strong
+                    class="
+                        text-slate-200
+                        ml-1
+                    "
+                >
+                    RASPBERRY PI 5
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span
+                    class="text-slate-500"
+                >
+                    AI
+                </span>
+
+                <strong
+                    class="
+                        text-emerald-400
+                        ml-1
+                    "
+                >
+                    HAILO
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span
+                    class="text-slate-500"
+                >
+                    CONNECTION
+                </span>
+
+                <strong
+                    id="ws-status"
+                    class="
+                        text-amber-400
+                        ml-1
+                    "
+                >
+                    CONNECTING
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- ====================================================== -->
+<!-- MAIN -->
+<!-- ====================================================== -->
+
+<main
+    class="
+        max-w-[1800px]
+        mx-auto
+        p-4
+        md:p-6
+    "
+>
+
+
+    <!-- ================================================== -->
+    <!-- SYSTEM SUMMARY -->
+    <!-- ================================================== -->
+
+    <section
+        class="
+            grid
+            grid-cols-2
+            md:grid-cols-4
+            gap-3
+            mb-5
+        "
+    >
+
+        <div
+            class="
+                bg-slate-900
+                border
+                border-slate-800
+                rounded-xl
+                p-4
+            "
+        >
+
+            <div
+                class="
+                    text-xs
+                    text-slate-500
+                "
+            >
+                ACTIVE CAMERAS
+            </div>
+
+            <div
+                id="active-camera-count"
+                class="
+                    text-3xl
+                    font-black
+                    mt-1
+                "
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div
+            class="
+                bg-slate-900
+                border
+                border-slate-800
+                rounded-xl
+                p-4
+            "
+        >
+
+            <div
+                class="
+                    text-xs
+                    text-slate-500
+                "
+            >
+                TOTAL PERSON
+            </div>
+
+            <div
+                id="total-person-count"
+                class="
+                    text-3xl
+                    font-black
+                    mt-1
+                "
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div
+            id="system-status-card"
+            class="
+                bg-slate-900
+                border
+                border-slate-800
+                rounded-xl
+                p-4
+            "
+        >
+
+            <div
+                class="
+                    text-xs
+                    text-slate-500
+                "
+            >
+                SYSTEM STATUS
+            </div>
+
+            <div
+                id="system-status"
+                class="
+                    text-2xl
+                    font-black
+                    text-emerald-400
+                    mt-1
+                "
+            >
+                SAFE
+            </div>
+
+        </div>
+
+
+        <div
+            class="
+                bg-slate-900
+                border
+                border-slate-800
+                rounded-xl
+                p-4
+            "
+        >
+
+            <div
+                class="
+                    text-xs
+                    text-slate-500
+                "
+            >
+                LAST UPDATE
+            </div>
+
+            <div
+                id="last-update"
+                class="
+                    text-lg
+                    font-bold
+                    mt-2
+                "
+            >
+                --
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================== -->
+    <!-- CAMERA GRID -->
+    <!-- ================================================== -->
+
+    <section
+        id="camera-grid"
+        class="
+            grid
+            grid-cols-1
+            lg:grid-cols-2
+            gap-5
+        "
+    >
+
+        <!-- Camera cards generated by JavaScript -->
+
+    </section>
+
+
+</main>
+
+
+<!-- ====================================================== -->
+<!-- CAMERA TEMPLATE -->
+<!-- ====================================================== -->
+
+<template id="camera-template">
+
+    <article
+        class="
+            camera-card
+            bg-slate-900
+            border
+            border-slate-800
+            rounded-2xl
+            overflow-hidden
+        "
+    >
+
+        <!-- HEADER -->
+
+        <div
+            class="
+                px-4
+                py-3
+                border-b
+                border-slate-800
+                flex
+                items-center
+                justify-between
+            "
+        >
+
+            <div>
+
+                <div
+                    class="
+                        font-bold
+                        text-sm
+                    "
+                    data-camera-name
+                >
+                    CAMERA
+                </div>
+
+                <div
+                    class="
+                        text-[10px]
+                        text-slate-500
+                        uppercase
+                        tracking-wider
+                    "
+                >
+                    CAMERA
+                    <span
+                        data-camera-id
+                    >
+                        1
+                    </span>
+                </div>
+
+            </div>
+
+
+            <div
+                data-status-badge
+                class="
+                    px-2.5
+                    py-1
+                    rounded-full
+                    text-[10px]
+                    font-bold
+                    bg-slate-800
+                    text-slate-400
+                "
+            >
+                OFFLINE
+            </div>
+
+        </div>
+
+
+        <!-- VIDEO -->
+
+        <div
+            class="
+                video-container
+                bg-black
+                relative
+                overflow-hidden
+            "
+        >
+
+            <img
+                data-video
+                class="
+                    absolute
+                    inset-0
+                    w-full
+                    h-full
+                    object-contain
+                "
+                alt="Camera feed"
+            >
+
+
+            <!-- DISABLED / OFFLINE OVERLAY -->
+
+            <div
+                data-overlay
+                class="
+                    absolute
+                    inset-0
+                    flex
+                    items-center
+                    justify-center
+                    bg-slate-950/80
+                "
+            >
+
+                <div
+                    class="
+                        text-center
+                    "
+                >
+
+                    <div
+                        class="
+                            text-4xl
+                            mb-3
+                        "
+                        data-overlay-icon
+                    >
+                        📷
+                    </div>
+
+                    <div
+                        class="
+                            text-sm
+                            font-bold
+                            text-slate-300
+                        "
+                        data-overlay-text
+                    >
+                        CAMERA OFFLINE
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- DANGER OVERLAY -->
+
+            <div
+                data-danger-banner
+                class="
+                    hidden
+                    absolute
+                    top-3
+                    left-3
+                    right-3
+                    bg-red-600/90
+                    border
+                    border-red-400
+                    rounded-lg
+                    p-2
+                    text-center
+                    text-xs
+                    font-black
+                    tracking-wider
+                    danger-pulse
+                "
+            >
+                ⚠️ DANGER —
+                PERSON IN SAFETY ZONE
+            </div>
+
+        </div>
+
+
+        <!-- TELEMETRY -->
+
+        <div
+            class="
+                p-4
+            "
+        >
+
+            <div
+                class="
+                    grid
+                    grid-cols-3
+                    gap-3
+                "
+            >
+
+                <!-- FPS -->
+
+                <div
+                    class="
+                        bg-slate-950
+                        rounded-lg
+                        p-3
+                    "
+                >
+
+                    <div
+                        class="
+                            text-[10px]
+                            text-slate-500
+                        "
+                    >
+                        FPS
+                    </div>
+
+                    <div
+                        data-fps
+                        class="
+                            text-xl
+                            font-black
+                            mt-1
+                        "
+                    >
+                        0.0
+                    </div>
+
+                </div>
+
+
+                <!-- PERSON -->
+
+                <div
+                    class="
+                        bg-slate-950
+                        rounded-lg
+                        p-3
+                    "
+                >
+
+                    <div
+                        class="
+                            text-[10px]
+                            text-slate-500
+                        "
+                    >
+                        PERSON
+                    </div>
+
+                    <div
+                        data-person
+                        class="
+                            text-xl
+                            font-black
+                            mt-1
+                        "
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <!-- DISTANCE -->
+
+                <div
+                    class="
+                        bg-slate-950
+                        rounded-lg
+                        p-3
+                    "
+                >
+
+                    <div
+                        class="
+                            text-[10px]
+                            text-slate-500
+                        "
+                    >
+                        MIN DIST.
+                    </div>
+
+                    <div
+                        class="
+                            mt-1
+                        "
+                    >
+
+                        <span
+                            data-distance
+                            class="
+                                text-xl
+                                font-black
+                            "
+                        >
+                            --
+                        </span>
+
+                        <span
+                            class="
+                                text-xs
+                                text-slate-500
+                            "
+                        >
+                            m
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATUS -->
+
+            <div
+                class="
+                    mt-3
+                    flex
+                    justify-between
+                    items-center
+                "
+            >
+
+                <div
+                    class="
+                        text-xs
+                        text-slate-500
+                    "
+                >
+                    SAFETY STATUS
+                </div>
+
+                <div
+                    data-safety-status
+                    class="
+                        text-xs
+                        font-black
+                        text-emerald-400
+                    "
+                >
+                    SAFE / AMAN
+                </div>
+
+            </div>
+
+
+            <!-- DISTANCE BAR -->
+
+            <div
+                class="
+                    mt-2
+                    h-2
+                    bg-slate-800
+                    rounded-full
+                    overflow-hidden
+                "
+            >
+
+                <div
+                    data-distance-bar
+                    class="
+                        h-full
+                        rounded-full
+                        bg-emerald-500
+                        transition-all
+                        duration-300
+                    "
+                    style="width: 0%"
+                ></div>
+
+            </div>
+
+
+            <div
+                class="
+                    flex
+                    justify-between
+                    mt-1
+                    text-[9px]
+                    text-slate-600
+                "
+            >
+
+                <span>
+                    0m
+                </span>
+
+                <span
+                    data-danger-limit
+                >
+                    Limit: 7.2m
+                </span>
+
+                <span>
+                    15m+
+                </span>
+
+            </div>
+
+        </div>
+
+    </article>
+
+</template>
+
+
+<!-- ====================================================== -->
+<!-- JAVASCRIPT -->
+<!-- ====================================================== -->
+
+<script>
+
+const MAX_CAMERAS = 4;
+
+let websocket = null;
+
+const cameraElements = {};
+
+
+function createCameraCard(cameraId) {
+
+    const template =
+        document.getElementById(
+            "camera-template"
+        );
+
+    const clone =
+        template.content.cloneNode(
+            true
+        );
+
+    const article =
+        clone.querySelector(
+            "article"
+        );
+
+    article.dataset.cameraId =
+        cameraId;
+
+    article.querySelector(
+        "[data-camera-id]"
+    ).innerText =
+        cameraId;
+
+    document
+        .getElementById(
+            "camera-grid"
+        )
+        .appendChild(
+            article
+        );
+
+    cameraElements[
+        cameraId
+    ] = article;
+
+    return article;
+}
+
+
+function initializeCameras() {
+
+    for (
+        let cameraId = 1;
+        cameraId <= MAX_CAMERAS;
+        cameraId++
+    ) {
+
+        createCameraCard(
+            cameraId
+        );
+
+    }
+
+}
+
+
+function setStatusBadge(
+    element,
+    status
+) {
+
+    const badge =
+        element.querySelector(
+            "[data-status-badge]"
+        );
+
+    badge.innerText =
+        status;
+
+
+    badge.className =
+        `
+        px-2.5
+        py-1
+        rounded-full
+        text-[10px]
+        font-bold
+        ${getStatusClass(status)}
+        `;
+
+}
+
+
+function getStatusClass(
+    status
+) {
+
+    switch (status) {
+
+        case "ONLINE":
+
+            return `
+                bg-emerald-500/15
+                text-emerald-400
+                border
+                border-emerald-500/30
+            `;
+
+        case "CONNECTING":
+
+            return `
+                bg-amber-500/15
+                text-amber-400
+                border
+                border-amber-500/30
+            `;
+
+        case "ERROR":
+
+            return `
+                bg-red-500/15
+                text-red-400
+                border
+                border-red-500/30
+            `;
+
+        case "DISABLED":
+
+            return `
+                bg-slate-800
+                text-slate-500
+                border
+                border-slate-700
+            `;
+
+        default:
+
+            return `
+                bg-slate-800
+                text-slate-400
+                border
+                border-slate-700
+            `;
+    }
+
+}
+
+
+function updateCamera(
+    cameraId,
+    data
+) {
+
+    const element =
+        cameraElements[
+            cameraId
+        ];
+
+    if (!element) {
+        return;
+    }
+
+
+    // ======================================================
+    // BASIC INFO
+    // ======================================================
+
+    element.querySelector(
+        "[data-camera-name]"
+    ).innerText =
+        data.name ||
+        `Camera ${cameraId}`;
+
+
+    setStatusBadge(
+        element,
+        data.status
+    );
+
+
+    // ======================================================
+    // VIDEO
+    // ======================================================
+
+    const video =
+        element.querySelector(
+            "[data-video]"
+        );
+
+    const overlay =
+        element.querySelector(
+            "[data-overlay]"
+        );
+
+    const overlayText =
+        element.querySelector(
+            "[data-overlay-text]"
+        );
+
+    const overlayIcon =
+        element.querySelector(
+            "[data-overlay-icon]"
+        );
+
+
+    if (
+        data.status === "ONLINE"
+    ) {
+
+        const expectedUrl =
+            `/video/${cameraId}`;
+
+        if (
+            video.dataset.streamUrl
+            !== expectedUrl
+        ) {
+
+            video.src =
+                expectedUrl;
+
+            video.dataset.streamUrl =
+                expectedUrl;
+
+        }
+
+        video.style.display =
+            "block";
+
+        overlay.classList.add(
+            "hidden"
+        );
+
+    } else {
+
+        video.removeAttribute(
+            "src"
+        );
+
+        video.style.display =
+            "none";
+
+        overlay.classList.remove(
+            "hidden"
+        );
+
+
+        if (
+            data.status === "DISABLED"
+        ) {
+
+            overlayIcon.innerText =
+                "📷";
+
+            overlayText.innerText =
+                "CAMERA DISABLED";
+
+        } else if (
+            data.status === "CONNECTING"
+        ) {
+
+            overlayIcon.innerText =
+                "⏳";
+
+            overlayText.innerText =
+                "CONNECTING...";
+
+        } else if (
+            data.status === "ERROR"
+        ) {
+
+            overlayIcon.innerText =
+                "⚠️";
+
+            overlayText.innerText =
+                "CAMERA ERROR";
+
+        } else {
+
+            overlayIcon.innerText =
+                "📡";
+
+            overlayText.innerText =
+                "CAMERA OFFLINE";
+
+        }
+
+    }
+
+
+    // ======================================================
+    // TELEMETRY
+    // ======================================================
+
+    element.querySelector(
+        "[data-fps]"
+    ).innerText =
+        Number(
+            data.fps || 0
+        ).toFixed(1);
+
+
+    element.querySelector(
+        "[data-person]"
+    ).innerText =
+        data.person_count ||
+        0;
+
+
+    const distance =
+        element.querySelector(
+            "[data-distance]"
+        );
+
+
+    if (
+        data.min_distance !== null
+        &&
+        data.min_distance !== undefined
+    ) {
+
+        distance.innerText =
+            Number(
+                data.min_distance
+            ).toFixed(2);
+
+    } else {
+
+        distance.innerText =
+            "--";
+
+    }
+
+
+    // ======================================================
+    // SAFETY
+    // ======================================================
+
+    const safetyStatus =
+        element.querySelector(
+            "[data-safety-status]"
+        );
+
+    const dangerBanner =
+        element.querySelector(
+            "[data-danger-banner]"
+        );
+
+    const distanceBar =
+        element.querySelector(
+            "[data-distance-bar]"
+        );
+
+
+    const dangerLimit =
+        Number(
+            data.danger_distance || 7.2
+        );
+
+
+    element.querySelector(
+        "[data-danger-limit]"
+    ).innerText =
+        `Limit: ${dangerLimit.toFixed(1)}m`;
+
+
+    if (
+        data.alert_danger
+        === true
+    ) {
+
+        element.classList.add(
+            "danger"
+        );
+
+        element.classList.remove(
+            "offline"
+        );
+
+        safetyStatus.innerText =
+            "BAHAYA / DANGER";
+
+        safetyStatus.className =
+            `
+            text-xs
+            font-black
+            text-red-500
+            `;
+
+        dangerBanner.classList.remove(
+            "hidden"
+        );
+
+        distanceBar.className =
+            `
+            h-full
+            rounded-full
+            bg-red-500
+            transition-all
+            duration-300
+            `;
+
+    } else {
+
+        element.classList.remove(
+            "danger"
+        );
+
+        safetyStatus.innerText =
+            "SAFE / AMAN";
+
+        safetyStatus.className =
+            `
+            text-xs
+            font-black
+            text-emerald-400
+            `;
+
+        dangerBanner.classList.add(
+            "hidden"
+        );
+
+        distanceBar.className =
+            `
+            h-full
+            rounded-full
+            bg-emerald-500
+            transition-all
+            duration-300
+            `;
+
+    }
+
+
+    // ======================================================
+    // DISTANCE BAR
+    // ======================================================
+
+    if (
+        data.min_distance !== null
+        &&
+        data.min_distance !== undefined
+        &&
+        data.status === "ONLINE"
+    ) {
+
+        const distanceValue =
+            Number(
+                data.min_distance
+            );
+
+        const percentage =
+            Math.min(
+                (
+                    distanceValue
+                    / 15
+                )
+                * 100,
+                100
+            );
+
+        distanceBar.style.width =
+            `${percentage}%`;
+
+    } else {
+
+        distanceBar.style.width =
+            "0%";
+
+    }
+
+}
+
+
+function updateSystemSummary(
+    cameras
+) {
+
+    let activeCount = 0;
+
+    let totalPersons = 0;
+
+    let systemDanger = false;
+
+
+    Object.entries(
+        cameras
+    ).forEach(
+        ([cameraId, data]) => {
+
+            if (
+                data.status ===
+                "ONLINE"
+            ) {
+
+                activeCount++;
+
+            }
+
+
+            totalPersons +=
+                Number(
+                    data.person_count
+                    || 0
+                );
+
+
+            if (
+                data.alert_danger
+                === true
+            ) {
+
+                systemDanger =
+                    true;
+
+            }
+
+        }
+    );
+
+
+    document.getElementById(
+        "active-camera-count"
+    ).innerText =
+        activeCount;
+
+
+    document.getElementById(
+        "total-person-count"
+    ).innerText =
+        totalPersons;
+
+
+    const systemStatus =
+        document.getElementById(
+            "system-status"
+        );
+
+    const systemCard =
+        document.getElementById(
+            "system-status-card"
+        );
+
+
+    if (systemDanger) {
+
+        systemStatus.innerText =
+            "DANGER";
+
+        systemStatus.className =
+            `
+            text-2xl
+            font-black
+            text-red-500
+            mt-1
+            `;
+
+        systemCard.classList.add(
+            "border-red-600"
+        );
+
+    } else {
+
+        systemStatus.innerText =
+            "SAFE";
+
+        systemStatus.className =
+            `
+            text-2xl
+            font-black
+            text-emerald-400
+            mt-1
+            `;
+
+        systemCard.classList.remove(
+            "border-red-600"
+        );
+
+    }
+
+
+    document.getElementById(
+        "last-update"
+    ).innerText =
+        new Date().toLocaleTimeString();
+
+}
+
+
+function processTelemetry(
+    payload
+) {
+
+    if (
+        !payload
+        ||
+        !payload.cameras
+    ) {
+
+        return;
+
+    }
+
+
+    Object.entries(
+        payload.cameras
+    ).forEach(
+        ([cameraId, data]) => {
+
+            updateCamera(
+                Number(cameraId),
+                data
+            );
+
+        }
+    );
+
+
+    updateSystemSummary(
+        payload.cameras
+    );
+
+}
+
+
+function connectWebSocket() {
+
+    const protocol =
+        window.location.protocol
+        === "https:"
+            ? "wss:"
+            : "ws:";
+
+
+    const wsUrl =
+        `${protocol}//${window.location.host}/ws/telemetry`;
+
+
+    websocket =
+        new WebSocket(
+            wsUrl
+        );
+
+
+    websocket.onopen =
+        () => {
+
+            const status =
+                document.getElementById(
+                    "ws-status"
+                );
+
+            status.innerText =
+                "ONLINE";
+
+            status.className =
+                `
+                text-emerald-400
+                ml-1
+                `;
+
+        };
+
+
+    websocket.onmessage =
+        (event) => {
+
+            try {
+
+                const payload =
+                    JSON.parse(
+                        event.data
+                    );
+
+                processTelemetry(
+                    payload
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Telemetry parsing error:",
+                    error
+                );
+
+            }
+
+        };
+
+
+    websocket.onclose =
+        () => {
+
+            const status =
+                document.getElementById(
+                    "ws-status"
+                );
+
+            status.innerText =
+                "RECONNECTING";
+
+            status.className =
+                `
+                text-amber-400
+                ml-1
+                `;
+
+
+            setTimeout(
+                connectWebSocket,
+                2000
+            );
+
+        };
+
+
+    websocket.onerror =
+        () => {
+
+            websocket.close();
+
+        };
+
+}
+
+
+function initialize() {
+
+    initializeCameras();
+
+    connectWebSocket();
+
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initialize
+);
+
+</script>
+
+
+</body>
+
+</html>
